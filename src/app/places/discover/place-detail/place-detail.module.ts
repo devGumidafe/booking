@@ -20,4 +20,4 @@ import { CreateBookingComponent } from '../../../bookings/create-booking/create-
   entryComponents: [CreateBookingComponent]
 })
 export class PlaceDetailPageModule { }
-œ
+
