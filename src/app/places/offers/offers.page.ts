@@ -14,7 +14,7 @@ export class OffersPage implements OnInit {
   offers: Place[];
 
   constructor(private placesService: PlacesService,
-    private router: Router) { }
+              private router: Router) { }
 
   ngOnInit() {
     this.offers = this.placesService.getAllPlaces();
