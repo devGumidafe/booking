@@ -13,8 +13,9 @@ export class OffersPage implements OnInit {
 
   offers: Place[];
 
-  constructor(private placesService: PlacesService,
-              private router: Router) { }
+  constructor(
+    private placesService: PlacesService,
+    private router: Router) { }
 
   ngOnInit() {
     this.offers = this.placesService.getAllPlaces();
@@ -23,5 +24,9 @@ export class OffersPage implements OnInit {
     slidingItem.close();
     this.router.navigate(['/', 'places', 'offers', 'edit', offerId]);
     console.log('Edit item', offerId);
+  }
+
+  getDummyDate() {
+    return new Date();
   }
 }
