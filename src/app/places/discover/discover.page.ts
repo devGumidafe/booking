@@ -12,11 +12,17 @@ export class DiscoverPage implements OnInit {
 
   loadedPlaces: Place[];
 
-  constructor(private placesService: PlacesService) { }
+  constructor(
+    private placesService: PlacesService) { }
 
   ngOnInit() {
     this.loadedPlaces = this.placesService.getAllPlaces();
   }
+
+  ionViewWillEnter(){
+    this.loadedPlaces = this.placesService.getAllPlaces();
+  }
+
 
   onFilterUpdate(event: CustomEvent<SegmentChangeEventDetail>) {
     console.log(event.detail);
