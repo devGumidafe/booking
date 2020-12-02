@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Place } from './place.model';
 import { AuthService } from '../auth/auth.service';
 import { BehaviorSubject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +10,7 @@ import { take } from 'rxjs/operators';
 export class PlacesService {
 
   // tslint:disable-next-line: variable-name
-  private places = new BehaviorSubject<Place[]>([
+  public places = new BehaviorSubject<Place[]>([
     new Place('p1',
       'Manhattan Mansion',
       'In the heart of New York City',
@@ -49,7 +49,12 @@ export class PlacesService {
   }
 
   getPlace(id: string) {
-    return { ...this.places.find(p => p.id === id) };
+    return this.places.pipe(
+      take(1),
+      map(places => {
+        return { ...places.find(p => p.id === id) };
+      })
+    );
   }
 
   addPlace(title: string, description: string, price: number, dateFrom: Date, dateTo: Date) {
