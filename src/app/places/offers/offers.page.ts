@@ -35,10 +35,6 @@ export class OffersPage implements OnInit, OnDestroy {
     console.log('Edit item', offerId);
   }
 
-  getDummyDate() {
-    return new Date();
-  }
-
   ngOnDestroy() {
     if (this.placesSub) {
       this.placesSub.unsubscribe();
