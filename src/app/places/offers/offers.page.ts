@@ -14,6 +14,7 @@ export class OffersPage implements OnInit, OnDestroy {
 
   offers: Place[];
   private placesSub: Subscription;
+  isLoading = false;
 
   constructor(
     private placesService: PlacesService,
@@ -25,9 +26,12 @@ export class OffersPage implements OnInit, OnDestroy {
     });
   }
 
-  /*ionViewWillEnter(){
-    this.offers = this.placesService.getAllPlaces();
-  }*/
+  ionViewWillEnter() {
+    this.isLoading = true;
+    this.placesService.fetchPlaces().subscribe(() => {
+      this.isLoading = false;
+    });
+  }
 
   onEdit(offerId: string, slidingItem: IonItemSliding) {
     slidingItem.close();
