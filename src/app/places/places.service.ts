@@ -3,6 +3,7 @@ import { Place } from './place.model';
 import { AuthService } from '../auth/auth.service';
 import { BehaviorSubject } from 'rxjs';
 import { take, map, tap, delay } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -41,7 +42,8 @@ export class PlacesService {
   ]);
 
   constructor(
-    private authService: AuthService
+    private authService: AuthService,
+    private http: HttpClient
   ) { }
 
   getAllPlaces() {
@@ -57,17 +59,34 @@ export class PlacesService {
     );
   }
 
-  addPlace(title: string, description: string, price: number, dateFrom: Date, dateTo: Date) {
-    const newPlace = new Place(Math.random().toString(), title, description,
+  addPlace(
+    title: string,
+    description: string,
+    price: number,
+    dateFrom: Date,
+    dateTo: Date
+  ) {
+    const newPlace = new Place(Math.random().toString(),
+      title, description,
       'https://www.viajeselcorteingles.es/imagen/es/mic/nueva_york/home/img_mic_nueva_york_home_790x486_02.jpg',
-      price, dateFrom, dateTo, this.authService.getUserId());
+      price,
+      dateFrom,
+      dateTo,
+      this.authService.getUserId()
+    );
+    return this.http.
+      post('https://booking-c5583-default-rtdb.europe-west1.firebasedatabase.app/offered-places.json',
+        { ...newPlace, id: null })
+      .pipe(tap(restData => {
+        console.log(restData);
+      }));
 
-    return this.places.pipe(take(1),
+    /*return this.places.pipe(take(1),
       delay(1000),
       tap(places => {
         this.places.next(places.concat(newPlace));
       })
-    );
+    );*/
   }
 
   updatePlace(placeId: string, title: string, description: string) {
