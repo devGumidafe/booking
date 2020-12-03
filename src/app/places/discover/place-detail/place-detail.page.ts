@@ -1,10 +1,16 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActionSheetController, ModalController, NavController } from '@ionic/angular';
+import {
+  ActionSheetController,
+  ModalController,
+  NavController,
+} from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
 import { PlacesService } from '../../places.service';
 import { Place } from '../../place.model';
 import { CreateBookingComponent } from '../../../bookings/create-booking/create-booking.component';
 import { Subscription } from 'rxjs';
+import { BookingService } from '../../../bookings/booking.service';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'app-place-detail',
@@ -12,7 +18,6 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./place-detail.page.scss'],
 })
 export class PlaceDetailPage implements OnInit, OnDestroy {
-
   place: Place;
   private placeSub: Subscription;
 
@@ -21,18 +26,22 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private placesService: PlacesService,
     private modalCtrl: ModalController,
-    private actionSheetCtrl: ActionSheetController
+    private actionSheetCtrl: ActionSheetController,
+    private bookingService: BookingService,
+    private loadingCtrl: LoadingController
   ) { }
 
   ngOnInit() {
-    this.route.paramMap.subscribe(paramMap => {
+    this.route.paramMap.subscribe((paramMap) => {
       if (!paramMap.has('placeId')) {
         this.navCtrl.navigateBack('/places/discover');
         return;
       }
-      this.placeSub = this.placesService.getPlace(paramMap.get('placeId')).subscribe(place => {
-        this.place = place;
-      });
+      this.placeSub = this.placesService
+        .getPlace(paramMap.get('placeId'))
+        .subscribe((place) => {
+          this.place = place;
+        });
     });
   }
 
@@ -45,27 +54,28 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
       }
     });
     return await modal.present();*/
-    this.actionSheetCtrl.create({
-      header: 'Choose an Action',
-      buttons: [
-        {
-          text: 'Select Date',
-          handler: () => {
-            this.openBookingModal('select');
+    this.actionSheetCtrl
+      .create({
+        header: 'Choose an Action',
+        buttons: [
+          {
+            text: 'Select Date',
+            handler: () => {
+              this.openBookingModal('select');
+            },
           },
-        },
-        {
-          text: 'Random Date',
-          handler: () => {
-            this.openBookingModal('random');
+          {
+            text: 'Random Date',
+            handler: () => {
+              this.openBookingModal('random');
+            },
           },
-        },
-        {
-          text: 'Cancel'
-        }
-      ]
-    })
-      .then(actionSheetEl => {
+          {
+            text: 'Cancel',
+          },
+        ],
+      })
+      .then((actionSheetEl) => {
         actionSheetEl.present();
       });
   }
@@ -74,16 +84,33 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
     this.modalCtrl
       .create({
         component: CreateBookingComponent,
-        componentProps: { selectedPlace: this.place, selectedMode: mode }
+        componentProps: { selectedPlace: this.place, selectedMode: mode },
       })
-      .then(modalEl => {
+      .then((modalEl) => {
         modalEl.present();
         return modalEl.onDidDismiss();
       })
-      .then(resultData => {
-        console.log(resultData.data, resultData.role);
+      .then((resultData) => {
         if (resultData.role === 'confirm') {
-          console.log('BOOKED!');
+          this.loadingCtrl.create({
+            message: 'Booking place...'
+          })
+            .then(loadingEl => {
+              loadingEl.present();
+              const data = resultData.data.bookingData;
+              this.bookingService.addBooking(
+                this.place.id,
+                this.place.title,
+                this.place.imageUrl,
+                data.firstName,
+                data.lastName,
+                data.guestNumber,
+                data.startDate,
+                data.endDate
+              ).subscribe(() => {
+                loadingEl.dismiss();
+              });
+            });
         }
       });
   }
@@ -93,5 +120,4 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
       this.placeSub.unsubscribe();
     }
   }
-
 }
